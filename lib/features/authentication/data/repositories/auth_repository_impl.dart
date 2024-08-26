@@ -1,8 +1,8 @@
+// lib/features/authentication/data/repositories/auth_repository_impl.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:shopeasy/domain/entities/users.dart';
-import 'package:shopeasy/domain/repositories/auth_repositoru.dart';
-
+import 'package:shopeasy/features/authentication/domain/entities/user_entities.dart';
+import 'package:shopeasy/features/authentication/domain/repository/auth_repository.dart';
 
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -30,12 +30,14 @@ class AuthRepositoryImpl implements AuthRepository {
       return user != null
           ? UserEntity(
               uid: user.uid,
-              email: user.email,
-              displayName: user.displayName,
+              displayName: user.displayName ?? '',
+              email: user.email ?? '',
+              photoURL: user.photoURL ?? '',
             )
           : null;
     } catch (e) {
-      rethrow;
+      print('Google Sign-In failed: $e');
+      return null;
     }
   }
 
@@ -43,16 +45,5 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
     await _googleSignIn.signOut();
-  }
-
-  @override
-  Stream<UserEntity?> get user {
-    return _firebaseAuth.authStateChanges().map((user) => user != null
-        ? UserEntity(
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-          )
-        : null);
   }
 }
