@@ -12,8 +12,19 @@ class AuthState extends StateNotifier<UserEntity?> {
   final SignInWithGoogle signInWithGoogle;
   final SignOut signOut;
 
-  AuthState({required this.signInWithGoogle, required this.signOut})
-      : super(null);
+  AuthState({required this.signInWithGoogle, required this.signOut}) : super(null);
+
+  Future<void> checkAuthStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      state = UserEntity(
+        uid: user.uid,
+        displayName: user.displayName ?? '',
+        email: user.email ?? '',
+        photoURL: user.photoURL ?? '',
+      );
+    }
+  }
 
   Future<void> signIn() async {
     final user = await signInWithGoogle();
@@ -27,7 +38,6 @@ class AuthState extends StateNotifier<UserEntity?> {
 }
 
 final authProvider = StateNotifierProvider<AuthState, UserEntity?>((ref) {
-  // Initialize repository and use cases here
   final firebaseAuth = FirebaseAuth.instance;
   final googleSignIn = GoogleSignIn();
   final authRepository = AuthRepositoryImpl(firebaseAuth, googleSignIn);
